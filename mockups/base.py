@@ -279,7 +279,15 @@ class Mockup(object):
             except constraints.InvalidConstraint, e:
                 recalc_fields.extend(e.fields)
         return recalc_fields
-
+        
+    def pre_process_instance(self, instance):
+        '''
+        Overwrite this method to modify the created *instance* before it gets 
+        saved. It gets the generated *instance* and must return the
+        modified instance.
+        '''
+        return instance
+        
     def post_process_instance(self, instance):
         '''
         Overwrite this method to modify the created *instance* at the last
@@ -315,6 +323,7 @@ class Mockup(object):
                     self.creation_tries,
                     ', '.join([field.name for field in process]),
             ))
+        self.pre_process_instance(instance)
         if commit:
             instance.save()
             for field in instance._meta.many_to_many:
