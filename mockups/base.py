@@ -83,7 +83,7 @@ class Mockup(object):
 
     def __init__(self, model, constraints=None, follow_fk=None,
             generate_fk=None, follow_m2m=None, generate_m2m=None,
-            factory=None):
+            factory=None, force={}):
         '''
         Parameters:
             ``model``: A model class which is used to create the test data.
@@ -115,6 +115,9 @@ class Mockup(object):
 
             ``factory``: A Factory *instance*, overriding the one defined in the
             Mockup class.
+            
+            ``force``: A dictionary with field names for keys that includes 
+            specific values that should be forced on the created objects.
         '''
         self.model = model
         self.constraints = constraints or []
@@ -160,6 +163,7 @@ class Mockup(object):
             self.add_constraint(constraint)
 
         self._fieldname_to_generator = {}
+        self._forced_values = force
         self.prepare_class()
 
     def prepare_class(self):
@@ -202,6 +206,8 @@ class Mockup(object):
         Return a random value that can be assigned to the passed *field*
         instance.
         '''
+        if field.name in self._forced_values:
+            return self._forced_values[field.name]
         if field not in self._fieldname_to_generator:
             self._fieldname_to_generator[field] = self.get_generator(field)
         generator = self._fieldname_to_generator[field]
