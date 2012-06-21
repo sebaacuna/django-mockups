@@ -215,8 +215,9 @@ class Mockup(object):
             return IGNORE_FIELD
         return generator.get_value()
 
-    def process_field(self, instance, field):
-        value = self.get_value(field)
+    def process_field(self, instance, field, value=None):
+        if value is None:
+            value = self.get_value(field)
         if value is not IGNORE_FIELD:
             setattr(instance, field.name, value)
 
@@ -302,7 +303,7 @@ class Mockup(object):
         '''
         return instance
 
-    def create_one(self, commit=True):
+    def create_one(self, commit=True, force={}):
         '''
         Create and return one model instance. If *commit* is ``False`` the
         instance will not be saved and many to many relations will not be
@@ -315,7 +316,7 @@ class Mockup(object):
         process = instance._meta.fields
         while process and creation_tries > 0:
             for field in process:
-                self.process_field(instance, field)
+                self.process_field(instance, field, force.get(field.name))
             process = self.check_constrains(instance)
             creation_tries -= 1
         if creation_tries == 0:
@@ -341,7 +342,7 @@ class Mockup(object):
             committed=commit)
         return self.post_process_instance(instance)
 
-    def create(self, count=1, commit=True):
+    def create(self, count=1, commit=True, force={}):
         '''
         Create and return ``count`` model instances. If *commit* is ``False``
         the instances will not be saved and many to many relations will not be
@@ -353,7 +354,7 @@ class Mockup(object):
         '''
         object_list = []
         for i in xrange(count):
-            instance = self.create_one(commit=commit)
+            instance = self.create_one(commit=commit, force=force)
             object_list.append(instance)
         return object_list
 

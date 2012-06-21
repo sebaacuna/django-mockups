@@ -499,10 +499,17 @@ class TestManagementCommand(TestCase):
             self.assertEqual(obj.name, 'foo')
 
 class TestForcedValues(TestCase):
-    def test_forced_value(self):
+    def test_on_mockup(self):
         forced_value = "FORCED VALUE"
         mockup = SimpleMockup(SimpleModel, force={"name": forced_value})
         mockup.create_one()
         self.assertEqual(
                 SimpleModel.objects.filter(name=forced_value).count(), 1
+            )
+    def test_on_create(self):
+        forced_value = "FORCED VALUE"
+        mockup = SimpleMockup(SimpleModel)
+        mockup.create(5, force={"name": forced_value})
+        self.assertEqual(
+                SimpleModel.objects.filter(name=forced_value).count(), 5
             )
