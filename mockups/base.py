@@ -284,7 +284,13 @@ class Mockup(object):
             try:
                 constraint(self.model, instance)
             except constraints.InvalidConstraint, e:
-                recalc_fields.extend(e.fields)
+                for f in e.fields:
+                    if hasattr(f, "name"):
+                        field = f
+                    else:
+                        field = self.model._meta.get_field_by_name(f)[0]
+                    recalc_fields.append(field)
+                    
         return recalc_fields
         
     def pre_process_instance(self, instance):
