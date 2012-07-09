@@ -8,6 +8,8 @@ from mockups.helpers import get_mockup
 class IGNORE_FIELD(object):
     pass
 
+class NO_DEFAULT(object):
+    pass
 
 class CreateInstanceError(Exception):
     pass
@@ -215,8 +217,8 @@ class Mockup(object):
             return IGNORE_FIELD
         return generator.get_value()
 
-    def process_field(self, instance, field, value=None):
-        if value is None:
+    def process_field(self, instance, field, value=NO_DEFAULT):
+        if value is NO_DEFAULT:
             value = self.get_value(field)
         if value is not IGNORE_FIELD:
             setattr(instance, field.name, value)
@@ -322,7 +324,7 @@ class Mockup(object):
         process = instance._meta.fields
         while process and creation_tries > 0:
             for field in process:
-                self.process_field(instance, field, force.get(field.name))
+                self.process_field(instance, field, force.get(field.name, NO_DEFAULT))
             process = self.check_constrains(instance)
             creation_tries -= 1
         if creation_tries == 0:
